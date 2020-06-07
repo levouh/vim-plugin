@@ -72,6 +72,8 @@ fu! s:plugin_clean() abort " {{{1
     let plugin_list = join(plugins_to_remove, "\t\n")
 
     if empty(plugin_list)
+        redraw | echohl WarningMsg | echo "Nothing to do" | echohl None
+
         " Nothing to remove
         return
     endif
@@ -84,7 +86,11 @@ fu! s:plugin_clean() abort " {{{1
         call system(cmd)
 
         redraw | echohl WarningMsg | echo "Removed  " .. len(plugins_to_remove) .. " plugin(s)" | echohl None
+
+        return
     endif
+
+    redraw | echohl WarningMsg | echo "Aborting" | echohl None
 endfu
 
 fu! s:plugin(bang, plugin, ...) abort " {{{1

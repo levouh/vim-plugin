@@ -9,6 +9,8 @@ let s:plugins_dir = substitute(&packpath, ",.*", "", "") .. "/pack/plugins/opt"
 let s:plugins = { "levouh/vim-plugin" : "master" }
 
 fu! s:plugin_install(bang) abort " {{{1
+    let override = ""
+
     if a:bang
         " If the command that calls this function is called with a <bang>, we will
         " override any local changes and 'hard reinstall' each plugin
@@ -17,8 +19,6 @@ fu! s:plugin_install(bang) abort " {{{1
         " Remove all directories that exist, but aren't listed as one of
         " the entries in the "s:plugins" dictionary
         call s:plugin_clean()
-    else
-        let override = ""
     endif
 
     " Keep track of the number of plugins that are installed for a useful
@@ -29,6 +29,8 @@ fu! s:plugin_install(bang) abort " {{{1
     silent! call mkdir(s:plugins_dir, 'p')
 
     for [plugin, branch] in items(s:plugins)
+        redraw | echohl WarningMsg | echo "Installing " .. plugin | echohl None
+
         " Form the name of the plugin from the github 'url'.
         " Cloning of the plugin will be done into a directory matching this name,
         " so note that two plugins cannot have the same 'name'

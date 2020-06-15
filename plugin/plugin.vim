@@ -12,10 +12,6 @@ fu! s:plugin_install(bang) abort " {{{1
     let override = ""
 
     if a:bang
-        " If the command that calls this function is called with a <bang>, we will
-        " override any local changes and 'hard reinstall' each plugin
-        let override = "(git reset --hard HEAD && git clean -f -d); "
-
         " Remove all directories that exist, but aren't listed as one of
         " the entries in the "s:plugins" dictionary
         call s:plugin_clean()
@@ -30,6 +26,12 @@ fu! s:plugin_install(bang) abort " {{{1
 
     for [plugin, branch] in items(s:plugins)
         redraw | echohl WarningMsg | echo "Installing " .. plugin | echohl None
+
+        if a:bang
+            " If the command that calls this function is called with a <bang>, we will
+            " override any local changes and 'hard reinstall' each plugin
+            let override = "(git reset --hard HEAD && git clean -f -d && git checkout " .. branch .. "); "
+        endif
 
         " Form the name of the plugin from the github 'url'.
         " Cloning of the plugin will be done into a directory matching this name,

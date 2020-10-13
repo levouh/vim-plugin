@@ -21,6 +21,10 @@ fu! s:plugin_install(bang) abort " {{{1
     " message later
     let num_installed = 0
 
+    " Useful to know what failed as well
+    let num_failed = 0
+    let failed = []
+
     " Ensure that the directory to install plugins in exists
     silent! call mkdir(s:plugins_dir, 'p')
 
@@ -43,15 +47,22 @@ fu! s:plugin_install(bang) abort " {{{1
         call system("git clone --recurse-submodules --depth=1 -b " .. branch .. " --single-branch " .. github_url ..
             \ " " .. plugin_dir .." 2> /dev/null || (cd " .. plugin_dir .. " ; " .. override .. "git pull)")
 
-        exe "packadd " .. plugin_name
+        if v:shell_error != ''
+            redraw | echohl ErrorMsg | echo plugin_name .. " failed!" | echohl None | sleep 500m
 
-        let num_installed += 1
+            let num_failed += 1
+            call add(failed, plugin_name)
+        else
+            let num_installed += 1
+            exe "packadd " .. plugin_name
+        endif
     endfor
 
     " Rebuild helptags if they are provided by these plugins via a 'doc' folder
     silent! helptags ALL
 
-    redraw | echohl WarningMsg | echo "Installed " .. num_installed .. " plugin(s)" | echohl None
+    redraw | echohl WarningMsg | echo "Done! " .. num_installed .. " installed, " .. num_failed .. " failed:\n" | echohl None
+    echohl ErrorMsg | echo join(failed, "\n") | echohl None | sleep 500m
 endfu
 
 fu! s:plugin_clean() abort " {{{1
